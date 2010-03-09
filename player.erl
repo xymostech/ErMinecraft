@@ -20,12 +20,12 @@ player(UpdateControl,ServData,Level,SockD,Upd,Player) ->
 		{login,Name,MPPass} ->
 			{ok,{IP,_}}=inet:peername(SockD),
 			io:format("~s joined at IP ~p~n",[string:strip(Name),addr_to_string(IP)]),
-			MD5Test = md5_hex("1234"++string:strip(Name)),
+			MD5Test = md5_hex(integer_to_list(util:getInfo(salt,ServData))++string:strip(Name)),
 			case string:strip(MPPass) of
 				MD5Test ->
-					io:format("Name is verified!~n");
+					io:format("~s is verified!~n",[string:strip(Name)]);
 				_ ->
-					io:format("Name is not verified...~n")
+					io:format("~s is not verified...~n",[string:strip(Name)])
 			end,
 			
 			UpdateControl ! {add,#player{id=0,updater=Upd,name=Name,pos=0,rot=0},self()},
@@ -34,19 +34,20 @@ player(UpdateControl,ServData,Level,SockD,Upd,Player) ->
 					Player#player{id=ID,name=Name}
 			end;
 		{block,Pos,Mode,Type} ->
-			io:format("Player got block @ ~p~n",Pos),
 			UpdateControl ! {block,Player,Pos,Mode,Type},
 			same;
 		{pos,Pos,Rot} ->
 			UpdateControl ! {pos,Player,Pos,Rot},
 			same;
+		{chat,Chat} ->
+			UpdateControl ! {chat,Player,Chat};
 		close ->
-			io:format("Closing player...~n"),
+			io:format("~s disconnected...~n",[string:strip(Player#player.name)]),
 			UpdateControl ! {remove,Player},
 			exit(Upd,done),
 			exit(self(),done);
 		_ ->
-			ok
+			same
 	end,
 	case NewPlayer of
 		same ->

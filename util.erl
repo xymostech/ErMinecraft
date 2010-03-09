@@ -4,13 +4,13 @@
 listtoint(Integer,Endian) ->
 	case Endian of
 		little ->
-			listtoint(Integer);
+			listtoint(lists:reverse(Integer));
 		big ->
-			listtoint(lists:reverse(Integer))
+			listtoint(Integer)
 	end.
 
 listtoint(Integer) -> 
-	listtoint(Integer,0,0).
+	listtoint(lists:reverse(Integer),0,0).
 
 listtoint([Head|Tail],Power,Total) ->
 	listtoint(Tail,Power+1,Head*math:pow(256,Power)+Total);

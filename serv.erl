@@ -3,6 +3,7 @@
 
 servStart() ->
 	Level=level:levelLoad("server_level.data"),
+	level:levelSave(Level,"server_level.data"),
 	LevelProc=level:levelStart(Level),
 	ServData=servData:setupServData(25565,16,true,"Hello, world!","Your friendly neighborhood server (chat not working)"),
 	UpdateServ=updateServer:updateServ(LevelProc,ServData),
