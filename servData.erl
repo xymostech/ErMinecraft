@@ -18,9 +18,9 @@ servData(Port,MaxPlayers,Playerlist,Public,Salt,Name,Motd) ->
 					servData(Port,MaxPlayers,Playerlist,Public,Salt,Name,Motd)
 			end;
 		{releaseID,ID} ->
-			servData(Port,MaxPlayers,lists:sublist(Playerlist,1,ID)++[0]++lists:nthtail(ID+1,Playerlist),Public,Salt,Name,Motd);
+			servData(Port,MaxPlayers,lists:sublist(Playerlist,1,ID-1)++[0]++lists:nthtail(ID,Playerlist),Public,Salt,Name,Motd);
 		{data,Sender} ->
-			Sender ! {data,Port,lists:sum(Playerlist),MaxPlayers,Name,Public,Salt},
+			Sender ! {data,{Port,lists:sum(Playerlist),MaxPlayers,Name,Public,Salt}},
 			servData(Port,MaxPlayers,Playerlist,Public,Salt,Name,Motd);
 		{salt,Sender} ->
 			Sender ! {salt,Salt},
@@ -37,7 +37,7 @@ getNewID(List) ->
 getNewID([Start|Rest],Begin,Num) ->
 	if
 		Start == 0 ->
-			{Begin++[1]++Rest,Num};
+			{Begin++[1]++Rest,Num+1};
 		true ->
 			getNewID(Rest,lists:append(Begin,[Start]),Num+1)
 	end.

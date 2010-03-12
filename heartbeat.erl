@@ -1,10 +1,13 @@
 -module (heartbeat).
--export ([beat/6,default/0]).
+-export ([beat/1,beat/6,default/0]).
 
 % default: heartbeat:beat(25565,1,1,"Testing...",true,1234).
 
 default() ->
 	timer:apply_interval(20000,heartbeat,beat,[25565,1,1,"Testing...",true,1234]).
+
+beat(ServData) ->
+	apply(heartbeat,beat,tuple_to_list(util:getInfo(data,ServData))).
 
 beat(Port,Players,Max,Name,Public,Salt) ->
 	inets:start(),

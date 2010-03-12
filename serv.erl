@@ -3,9 +3,8 @@
 
 servStart() ->
 	Level=level:levelLoad("server_level.data"),
-	level:levelSave(Level,"server_level.data"),
 	LevelProc=level:levelStart(Level),
-	ServData=servData:setupServData(25565,16,true,"Hello, world!","Your friendly neighborhood server (chat not working)"),
+	ServData=servData:setupServData(25565,16,true,"Hello, world!","&4Your friendly neighborhood server (chat working!)"),
+	timer:apply_interval(60000,heartbeat,beat,[ServData]),
 	UpdateServ=updateServer:updateServ(LevelProc,ServData),
-	acceptor:start(UpdateServ,ServData,LevelProc),
-	io:format("Level: ~p~nServData: ~p~nUpdate: ~p~n",[LevelProc,ServData,UpdateServ]).
+	acceptor:start(UpdateServ,ServData,LevelProc).

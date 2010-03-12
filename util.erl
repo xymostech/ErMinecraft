@@ -1,5 +1,5 @@
 -module (util).
--export ([listtoint/1,listtoint/2,inttolist/2,inttolist/3,space/2,md5_hex/1,splitat/2,wait/1,addr_to_string/1,getInfo/2]).
+-export ([listtoint/1,listtoint/2,inttolist/2,inttolist/3,space/2,md5_hex/1,splitat/2,wait/1,addr_to_string/1,getInfo/2,colorize/1,decolorize/1]).
 
 listtoint(Integer,Endian) ->
 	case Endian of
@@ -82,3 +82,33 @@ getInfo(Type,Data) ->
 		{Type,Rest} ->
 			Rest
 	end.
+
+colorize(Chat) ->
+	colorize(Chat,[]).
+
+colorize([Head,Next|Tail],Total) ->
+	if
+		(Head == $#) and (((Next =< $9) and (Next >= $0)) or ((Next =< $f) and (Next >= $a))) ->
+			colorize(Tail,Total++[$&,Next]);
+		true ->
+			colorize([Next|Tail],Total++[Head])
+	end;
+colorize([Next],Total)->
+	Total++[Next];
+colorize([],Total) ->
+	Total.
+
+decolorize(Chat) ->
+	decolorize(Chat,[]).
+
+decolorize([Head,Next|Tail],Total) ->
+	if
+		(Head == $$) and (((Next =< $9) and (Next >= $0)) or ((Next =< $f) and (Next >= $a))) ->
+			decolorize(Tail,Total);
+		true ->
+			decolorize([Next|Tail],Total++[Head])
+	end;
+decolorize([Next],Total)->
+	Total++[Next];
+decolorize([],Total) ->
+	Total.

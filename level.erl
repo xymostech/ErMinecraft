@@ -20,12 +20,12 @@ level(Level) ->
 			same;
 		{get,Sender,Place} ->
 			Size=Level#level.size,
-			Sender ! {get,lists:nth(Size#size.x*Size#size.z*Place#size.y+Size#size.x*Place#size.z+Place#size.x,Level#level.data)},
+			Sender ! {get,lists:nth(Size#size.x*Size#size.z*Place#size.y+Size#size.x*Place#size.z+Place#size.x+1,Level#level.data)},
 			same;
 		{set,_,New,Place} ->
 			Size=Level#level.size,
 			Pos = Size#size.x*Size#size.z*Place#size.y+Size#size.x*Place#size.z+Place#size.x,
-			Level#level{data=lists:sublist(Level#level.data,1,Pos-1)++[New]++lists:nthtail(Pos+1,Level#level.data)};
+			Level#level{data=lists:sublist(Level#level.data,1,Pos)++[New]++lists:nthtail(Pos+1,Level#level.data)};
 		{update} ->
 			update
 	end,
@@ -42,7 +42,6 @@ levelLoad(Name) ->
 	{ok,CompressedFile} = file:read_file(Name),
 	CFile = binary_to_list(CompressedFile),
 	Size = util:listtoint(lists:sublist(CFile,1,4)),
-	io:format("Size: ~p~n",[lists:sublist(CFile,1,4)]),
 	CompressedData = list_to_binary(lists:sublist(CFile,5,Size)),
 	Uncomp = binary_to_list(zlib:gunzip(CompressedData)),
 	MapSize=#size{x=util:listtoint(lists:sublist(CFile,Size+5,2)),y=util:listtoint(lists:sublist(CFile,Size+7,2)),z=util:listtoint(lists:sublist(CFile,Size+9,2))},

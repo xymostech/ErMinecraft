@@ -25,9 +25,23 @@ updateServ(Level,ServData,Players) ->
 		{pos,Player,Pos,Rot} ->
 			NewP = lists:map(fun(P) -> if Player#player.id==P#player.id -> P#player{pos=Pos,rot=Rot}; true -> P#player.updater!{pos,Player#player.id,Pos,Rot}, P end end,Players),
 			updateServ(Level,ServData,NewP);
-		{block,_,Pos,Mode,Type} ->
-			Level ! {set,self(),case Mode of 0 -> 0; 1 -> Type end,Pos},
-			lists:map(fun(P) -> P#player.updater ! {block,Pos,case Mode of 0 -> 0; 1 -> Type end} end,Players),
+		{block,_,Pos,Type} ->
+			Level ! {set,self(),Type,Pos},
+			lists:map(fun(P) -> P#player.updater ! {block,Pos,Type} end,Players),
+			updateServ(Level,ServData,Players);
+		{chat,Player,Text} ->
+			lists:map(fun(P) -> P#player.updater ! {chat,Player#player.name++":&f "++util:colorize(Text)} end,Players),
+			io:format("~s~n",[Player#player.name++": "++util:colorize(Text)]),
+			updateServ(Level,ServData,Players);
+		{pchat,Player,ToName,Text} ->
+			lists:map(fun(P) -> case string:to_lower(P#player.name) of ToName -> P#player.updater ! {chat,Player#player.name++":&f "++util:colorize(Text)}; _ -> ok end end,Players),
+			updateServ(Level,ServData,Players);
+		{mess,Text} ->
+			lists:map(fun(P) -> P#player.updater ! {chat,Text} end,Players),
+			io:format("~s~n",[Text]),
+			updateServ(Level,ServData,Players);
+		{pmess,ToPlayer,Text} ->
+			ToPlayer#player.updater ! {chat,Text},
 			updateServ(Level,ServData,Players);
 		_ ->
 			updateServ(Level,ServData,Players)
